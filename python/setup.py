@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from distutils.core import setup, Extension
 from glob import glob
 from platform import system
