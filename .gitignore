@@ -18,5 +18,9 @@
 
 */.svn
 
+# Python
+*.pyc
+python/build
+
 # Temp files cretated by text editors
 *~
