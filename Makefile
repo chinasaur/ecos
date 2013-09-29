@@ -18,15 +18,9 @@ ldll.o:
 AMD = amd_aat amd_1 amd_2 amd_dump amd_postorder amd_post_tree amd_defaults \
     amd_order amd_control amd_info amd_valid amd_preprocess
 AMDL = $(addsuffix .o, $(subst amd_,amd_l_,$(AMD)))
-amd: amd_global.o $(AMDL)
-	
-amd_global.o:
+amd_global.o $(AMDL):
 	( cd external/amd    ; $(MAKE) )
-	$(AR) -x external/amd/libamd.a amd_global.o
-
-amd_l_%.o:
-	( cd external/amd    ; $(MAKE) )
-	$(AR) -x external/amd/libamd.a $(AMDL)
+	$(AR) -x external/amd/libamd.a amd_global.o $(AMDL)
 
 # build ECOS
 ecos: libecos.a
