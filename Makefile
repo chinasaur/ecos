@@ -5,20 +5,33 @@ include ecos.mk
 C = $(CC) $(CFLAGS) -Iinclude -Iexternal/ldl/include -Iexternal/amd/include -Iexternal/SuiteSparse_config
 
 # Compile all C code, including the C-callable routine
-all: ldl amd ecos demo	
+all: demo	
 
 # build Tim Davis' sparse LDL package
-ldl: 
+ldl: ldll.o
+	
+ldll.o: 
 	( cd external/ldl    ; $(MAKE) )
-	$(AR) -x external/ldl/libldl.a
+	$(AR) -x external/ldl/libldl.a ldll.o
 	
 # build Tim Davis' AMD package
-amd: 
+AMD = amd_aat amd_1 amd_2 amd_dump amd_postorder amd_post_tree amd_defaults \
+    amd_order amd_control amd_info amd_valid amd_preprocess
+AMDL = $(addsuffix .o, $(subst amd_,amd_l_,$(AMD)))
+amd: amd_global.o $(AMDL)
+	
+amd_global.o:
 	( cd external/amd    ; $(MAKE) )
-	$(AR) -x external/amd/libamd.a
+	$(AR) -x external/amd/libamd.a amd_global.o
+
+amd_l_%.o:
+	( cd external/amd    ; $(MAKE) )
+	$(AR) -x external/amd/libamd.a $(AMDL)
 
 # build ECOS
-ecos: ecos.o kkt.o cone.o spla.o timer.o preproc.o splamm.o
+ecos: libecos.a
+	
+libecos.a: ecos.o kkt.o cone.o spla.o timer.o preproc.o splamm.o ldll.o amd_global.o $(AMDL)
 	$(ARCHIVE) libecos.a *.o
 	- $(RANLIB) libecos.a
 
@@ -44,7 +57,9 @@ timer.o: src/timer.c include/timer.h
 	$(C) -c src/timer.c -o timer.o
 
 # ECOS demo
-demo: ldl amd ecos src/runecos.c 
+demo: runecos
+	
+runecos: libecos.a src/runecos.c 
 	$(C) -o runecos src/runecos.c libecos.a $(LIBS)
 	echo ECOS successfully built. Type ./runecos to run demo problem.
 	
