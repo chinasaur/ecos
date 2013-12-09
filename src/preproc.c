@@ -600,11 +600,12 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	mywork->stgs->maxit = MAXIT;
 	mywork->stgs->gamma = GAMMA;	
 	mywork->stgs->delta = DELTA;
-    mywork->stgs->eps = EPS;
+  mywork->stgs->eps = EPS;
 	mywork->stgs->nitref = NITREF;
 	mywork->stgs->abstol = ABSTOL;	
 	mywork->stgs->feastol = FEASTOL;
 	mywork->stgs->reltol = RELTOL;
+  mywork->stgs->verbose = VERBOSE;
 #if PRINTLEVEL > 2
     PRINTTEXT("Written settings\n");
 #endif
@@ -615,7 +616,12 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
   } else {
     mywork->A = NULL;
   }
-	mywork->G = createSparseMatrix(m, n, Gjc[n], Gjc, Gir, Gpr);	
+  if (Gpr && Gjc && Gir) {
+	  mywork->G = createSparseMatrix(m, n, Gjc[n], Gjc, Gir, Gpr);
+  } else {
+    // create an empty sparse matrix
+	  mywork->G = createSparseMatrix(m, n, 0, Gjc, Gir, Gpr);
+  }	
 #if PROFILING > 1
 	mywork->info->ttranspose = 0;
 	tic(&tmattranspose);

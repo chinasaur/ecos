@@ -63,8 +63,12 @@ void pinv(idxint n, idxint* p, idxint* pinv)
 spmat* transposeSparseMatrix(spmat* M)
 {	
 	idxint j, i, k, q;    
-	idxint* w = (idxint *)MALLOC(M->m*sizeof(idxint));
-	spmat* A = newSparseMatrix(M->n, M->m, M->nnz);
+	idxint* w;
+  
+  spmat* A = newSparseMatrix(M->n, M->m, M->nnz);
+  if (M->nnz == 0) return A;
+  
+	w = (idxint *)MALLOC(M->m*sizeof(idxint));
 
 	/* row count: how often does row k occur in M? */
 	for( i=0; i < M->m; i++ ) { w[i] = 0; }
@@ -112,7 +116,7 @@ spmat* createSparseMatrix(idxint m, idxint n, idxint nnz, idxint* jc, idxint* ir
 	M->jc = jc;
     M->ir = ir;
     M->pr = pr;
-	M->jc[n] = nnz;
+	if (M->jc) M->jc[n] = nnz;
 	return M;
 }
 
@@ -122,9 +126,9 @@ spmat* createSparseMatrix(idxint m, idxint n, idxint nnz, idxint* jc, idxint* ir
  */
 void freeSparseMatrix(spmat* M)
 {
-	FREE(M->ir);
-	FREE(M->jc);
-	FREE(M->pr);
+	if (M->ir) FREE(M->ir);
+	if (M->jc) FREE(M->jc);
+	if (M->pr) FREE(M->pr);
 	FREE(M);
 }
 
